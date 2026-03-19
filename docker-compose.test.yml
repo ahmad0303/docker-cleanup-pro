@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # Test service 1: Simple web app
+  app1:
+    image: nginx:latest
+    container_name: cleanup_test_app1
+    ports:
+      - "8080:80"
+    volumes:
+      - test_volume_1:/usr/share/nginx/html
+
+  # Test service 2: Another web app (older version)
+  app2:
+    image: nginx:1.23
+    container_name: cleanup_test_app2
+    ports:
+      - "8081:80"
+
+  # Test service 3: Database
+  db:
+    image: postgres:15
+    container_name: cleanup_test_db
+    environment:
+      POSTGRES_PASSWORD: testpassword
+      POSTGRES_DB: testdb
+    volumes:
+      - test_volume_2:/var/lib/postgresql/data
+
+  # Test service 4: Redis (will be stopped for cleanup testing)
+  cache:
+    image: redis:7
+    container_name: cleanup_test_cache
+
+volumes:
+  test_volume_1:
+    name: cleanup_test_volume_1
+  test_volume_2:
+    name: cleanup_test_volume_2
+
+# Usage:
+# 1. Start test environment:
+#    docker-compose up -d
+#
+# 2. Create some old containers:
+#    docker-compose stop cache
+#    docker run --name old_container_1 alpine:3.17 echo "test"
+#    docker run --name old_container_2 alpine:3.16 echo "test"
+#
+# 3. Pull multiple versions of an image:
+#    docker pull nginx:1.23
+#    docker pull nginx:1.22
+#    docker pull nginx:1.21
+#    docker pull nginx:1.20
+#
+# 4. Test dry-run:
+#    docker-cleanup --dry-run
+#
+# 5. Test actual cleanup:
+#    docker-cleanup --safe --keep-versions 2
+#
+# 6. Clean up test environment:
+#    docker-compose down -v

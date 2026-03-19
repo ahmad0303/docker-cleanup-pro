@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  docker-cleanup:
+    build: .
+    image: docker-cleanup-pro:latest
+    container_name: docker-cleanup
+    volumes:
+      # Mount Docker socket to interact with host Docker daemon
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      # Set to 1 for verbose output
+      - PYTHONUNBUFFERED=1
+    command: --safe --dry-run
+    # For one-time execution
+    restart: "no"
+
+  # Scheduled cleanup service (runs weekly)
+  docker-cleanup-scheduled:
+    build: .
+    image: docker-cleanup-pro:latest
+    container_name: docker-cleanup-scheduled
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+    # This would need a cron-like scheduler in production
+    # For now, it's a template - use Kubernetes CronJob or systemd timer instead
+    command: --safe
+    restart: "no"
+    profiles:
+      - scheduled
