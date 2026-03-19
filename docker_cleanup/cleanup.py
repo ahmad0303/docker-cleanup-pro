@@ -98,7 +98,7 @@ class DockerCleanup:
             images.sort(key=lambda x: x.attrs["Created"], reverse=True)
 
             # Keep only the last N versions
-            to_remove = images[self.keep_versions :]
+            to_remove = images[self.keep_versions:]
 
             for image in to_remove:
                 try:
